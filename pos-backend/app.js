@@ -13,8 +13,8 @@ connectDB();
 
 // Middlewares
 app.use(cors({
-    credentials: true,
-    origin: true
+  origin: ["https://rest-1-u8gp.onrender.com"],
+  credentials: true
 }));
 
 app.use(express.json());
