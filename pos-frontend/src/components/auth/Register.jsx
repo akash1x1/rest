@@ -3,7 +3,7 @@ import { register } from "../../https";
 import { useMutation } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 
-const Register = ({setIsRegister}) => {
+const Register = ({ setIsRegister }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -20,16 +20,18 @@ const Register = ({setIsRegister}) => {
     setFormData({ ...formData, role: selectedRole });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    registerMutation.mutate(formData);
-  };
-
+  // 🔥 Mutation
   const registerMutation = useMutation({
     mutationFn: (reqData) => register(reqData),
+
     onSuccess: (res) => {
+      console.log("SUCCESS:", res);
+
       const { data } = res;
-      enqueueSnackbar(data.message, { variant: "success" });
+      enqueueSnackbar(data.message || "Registered successfully", {
+        variant: "success",
+      });
+
       setFormData({
         name: "",
         email: "",
@@ -37,21 +39,42 @@ const Register = ({setIsRegister}) => {
         password: "",
         role: "",
       });
-      
+
       setTimeout(() => {
         setIsRegister(false);
       }, 1500);
     },
+
     onError: (error) => {
-      const { response } = error;
-      const message = response.data.message;
+      console.log("ERROR:", error);
+
+      const message =
+        error?.response?.data?.message || "Something went wrong";
+
       enqueueSnackbar(message, { variant: "error" });
     },
   });
 
+  // 🔥 Submit handler
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    console.log("SUBMIT CLICKED"); // 👈 DEBUG
+
+    if (!formData.role) {
+      enqueueSnackbar("Please select a role", { variant: "warning" });
+      return;
+    }
+
+    registerMutation.mutate(formData);
+  };
+
   return (
-    <div>
+    // 🔥 FIX APPLIED HERE (zIndex + position)
+    <div style={{ position: "relative", zIndex: 9999 }}>
       <form onSubmit={handleSubmit}>
+        
+        {/* Name */}
         <div>
           <label className="block text-[#ababab] mb-2 text-sm font-medium">
             Employee Name
@@ -68,6 +91,8 @@ const Register = ({setIsRegister}) => {
             />
           </div>
         </div>
+
+        {/* Email */}
         <div>
           <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
             Employee Email
@@ -84,6 +109,8 @@ const Register = ({setIsRegister}) => {
             />
           </div>
         </div>
+
+        {/* Phone */}
         <div>
           <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
             Employee Phone
@@ -100,6 +127,8 @@ const Register = ({setIsRegister}) => {
             />
           </div>
         </div>
+
+        {/* Password */}
         <div>
           <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
             Password
@@ -116,6 +145,8 @@ const Register = ({setIsRegister}) => {
             />
           </div>
         </div>
+
+        {/* Role */}
         <div>
           <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
             Choose your role
@@ -129,7 +160,7 @@ const Register = ({setIsRegister}) => {
                   type="button"
                   onClick={() => handleRoleSelection(role)}
                   className={`bg-[#1f1f1f] px-4 py-3 w-full rounded-lg text-[#ababab] ${
-                    formData.role === role ? "bg-indigo-700" : ""
+                    formData.role === role ? "bg-indigo-700 text-white" : ""
                   }`}
                 >
                   {role}
@@ -139,12 +170,14 @@ const Register = ({setIsRegister}) => {
           </div>
         </div>
 
+        {/* Submit */}
         <button
           type="submit"
           className="w-full rounded-lg mt-6 py-3 text-lg bg-yellow-400 text-gray-900 font-bold"
         >
           Sign up
         </button>
+
       </form>
     </div>
   );
