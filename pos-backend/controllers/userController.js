@@ -19,7 +19,6 @@ const register = async (req, res, next) => {
       return next(createHttpError(400, "User already exist!"));
     }
 
-    // ✅ HASH PASSWORD (VERY IMPORTANT)
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
@@ -58,37 +57,30 @@ const login = async (req, res, next) => {
       return next(createHttpError(401, "Invalid Credentials"));
     }
 
-    // ✅ COMPARE HASHED PASSWORD
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return next(createHttpError(401, "Invalid Credentials"));
     }
 
-    // ✅ CREATE TOKEN
+    // OPTIONAL TOKEN (not needed now)
     const accessToken = jwt.sign(
       { _id: user._id },
       config.accessTokenSecret,
       { expiresIn: "1d" }
     );
 
-    // ✅ COOKIE
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      sameSite: "none",
-      secure: true,
-    });
-
+    // 🔥 FIXED RESPONSE (IMPORTANT)
     res.status(200).json({
-  success: true,
-  message: "User login successfully!",
-  data: {
-    _id: isUserPresent._id,
-    name: isUserPresent.name,
-    email: isUserPresent.email,
-    phone: isUserPresent.phone,
-    role: isUserPresent.role,
-  }
-  });
+      success: true,
+      message: "User login successfully!",
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+      },
+    });
 
   } catch (error) {
     next(error);
@@ -119,6 +111,5 @@ const logout = async (req, res, next) => {
     next(error);
   }
 };
-
 
 module.exports = { register, login, getUserData, logout };
