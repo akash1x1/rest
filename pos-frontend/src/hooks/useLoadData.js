@@ -13,13 +13,17 @@ const useLoadData = () => {
     const fetchUser = async () => {
       try {
         const { data } = await getUserData();
-        console.log(data);
-        const { _id, name, email, phone, role } = data.data;
-        dispatch(setUser({ _id, name, email, phone, role }));
+        console.log("User Data:", data);
+
+        // If user exists → store in redux
+        if (data?.data) {
+          const { _id, name, email, phone, role } = data.data;
+          dispatch(setUser({ _id, name, email, phone, role }));
+        }
       } catch (error) {
+        // ✅ DO NOT redirect here (this was breaking your app)
+        console.log("User not logged in (expected case)");
         dispatch(removeUser());
-        navigate("/auth"); // ✅ FIXED
-        console.log(error);
       } finally {
         setIsLoading(false);
       }
