@@ -26,10 +26,24 @@ const Login = () => {
     onSuccess: (res) => {
       console.log("LOGIN SUCCESS:", res);
 
-      const { data } = res;
-      const { _id, name, email, phone, role } = data.data;
+      // ✅ SAFE ACCESS
+      const user = res?.data?.data;
+
+      // ❗ Handle wrong response
+      if (!user) {
+        console.log("Invalid response:", res);
+        enqueueSnackbar("Login failed: invalid server response", {
+          variant: "error",
+        });
+        return;
+      }
+
+      const { _id, name, email, phone, role } = user;
 
       dispatch(setUser({ _id, name, email, phone, role }));
+
+      enqueueSnackbar("Login successful", { variant: "success" });
+
       navigate("/");
     },
 
@@ -53,7 +67,6 @@ const Login = () => {
   };
 
   return (
-    // 🔥 FIX APPLIED HERE (zIndex)
     <div style={{ position: "relative", zIndex: 9999 }}>
       <form onSubmit={handleSubmit}>
         
