@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const axiosWrapper = axios.create({
-  baseURL: "https://rest-vj63.onrender.com", // 🔥 YOUR BACKEND URL
+  baseURL: "https://rest22.onrender.com", // ✅ FIXED
   withCredentials: false,
   headers: {
     "Content-Type": "application/json",
