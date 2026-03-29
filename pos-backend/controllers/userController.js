@@ -10,21 +10,16 @@ const register = async (req, res, next) => {
   try {
     const { name, phone, email, password, role } = req.body;
 
-    console.log("REGISTER REQUEST:", req.body); // 🔥 DEBUG
-
     if (!name || !phone || !email || !password || !role) {
       return next(createHttpError(400, "All fields are required!"));
     }
 
     const isUserPresent = await User.findOne({ email });
-    console.log("USER EXISTS CHECK:", isUserPresent); // 🔥 DEBUG
-
     if (isUserPresent) {
       return next(createHttpError(400, "User already exist!"));
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("HASHED PASSWORD:", hashedPassword); // 🔥 DEBUG
 
     const newUser = new User({
       name,
@@ -36,7 +31,8 @@ const register = async (req, res, next) => {
 
     await newUser.save();
 
-    console.log("USER SAVED:", newUser); // 🔥 DEBUG
+    // 🔥 DEBUG (REGISTER)
+    console.log("SAVED USER EMAIL:", newUser.email);
 
     res.status(201).json({
       success: true,
@@ -45,7 +41,7 @@ const register = async (req, res, next) => {
     });
 
   } catch (error) {
-    console.log("REGISTER ERROR:", error); // 🔥 DEBUG
+    console.log("REGISTER ERROR:", error); // optional debug
     next(error);
   }
 };
@@ -56,45 +52,34 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    console.log("\n====== LOGIN DEBUG START ======");
-
     if (!email || !password) {
-      console.log("Missing email/password");
       return next(createHttpError(400, "All fields are required!"));
     }
 
-    console.log("Entered Email:", email);
-    console.log("Entered Password:", password);
-
     const user = await User.findOne({ email });
 
-    console.log("USER FROM DB:", user); // 🔥 MOST IMPORTANT LINE
+    // 🔥 DEBUG (LOGIN)
+    console.log("LOGIN EMAIL:", email);
+    console.log("USER FROM DB:", user);
 
     if (!user) {
-      console.log("User NOT found in DB ❌");
       return next(createHttpError(401, "Invalid Credentials"));
     }
-
-    console.log("DB Stored Password:", user.password);
 
     const isMatch = await bcrypt.compare(password, user.password);
 
-    console.log("Password Match Result:", isMatch);
+    // 🔥 DEBUG
+    console.log("PASSWORD MATCH:", isMatch);
 
     if (!isMatch) {
-      console.log("Password mismatch ❌");
       return next(createHttpError(401, "Invalid Credentials"));
     }
-
-    console.log("Login SUCCESS ✅");
 
     const accessToken = jwt.sign(
       { _id: user._id },
       config.accessTokenSecret,
       { expiresIn: "1d" }
     );
-
-    console.log("====== LOGIN DEBUG END ======\n");
 
     res.status(200).json({
       success: true,
@@ -109,7 +94,7 @@ const login = async (req, res, next) => {
     });
 
   } catch (error) {
-    console.log("LOGIN ERROR:", error); // 🔥 DEBUG
+    console.log("LOGIN ERROR:", error); // optional debug
     next(error);
   }
 };
@@ -118,16 +103,9 @@ const login = async (req, res, next) => {
 // ================= GET USER =================
 const getUserData = async (req, res, next) => {
   try {
-    console.log("GET USER ID:", req.user?._id); // 🔥 DEBUG
-
     const user = await User.findById(req.user._id);
-
-    console.log("FETCHED USER:", user); // 🔥 DEBUG
-
     res.status(200).json({ success: true, data: user });
-
   } catch (error) {
-    console.log("GET USER ERROR:", error);
     next(error);
   }
 };
@@ -136,17 +114,12 @@ const getUserData = async (req, res, next) => {
 // ================= LOGOUT =================
 const logout = async (req, res, next) => {
   try {
-    console.log("LOGOUT CALLED"); // 🔥 DEBUG
-
     res.clearCookie("accessToken");
-
     res.status(200).json({
       success: true,
       message: "User logout successfully!",
     });
-
   } catch (error) {
-    console.log("LOGOUT ERROR:", error);
     next(error);
   }
 };
