@@ -57,19 +57,28 @@ const login = async (req, res, next) => {
       return next(createHttpError(401, "Invalid Credentials"));
     }
 
+    // 🔥 DEBUG START
+    console.log("====== LOGIN DEBUG ======");
+    console.log("Entered Email:", email);
+    console.log("Entered Password:", password);
+    console.log("DB Stored Password:", user.password);
+
     const isMatch = await bcrypt.compare(password, user.password);
+
+    console.log("Password Match Result:", isMatch);
+    console.log("=========================");
+    // 🔥 DEBUG END
+
     if (!isMatch) {
       return next(createHttpError(401, "Invalid Credentials"));
     }
 
-    // OPTIONAL TOKEN (not needed now)
     const accessToken = jwt.sign(
       { _id: user._id },
       config.accessTokenSecret,
       { expiresIn: "1d" }
     );
 
-    // 🔥 FIXED RESPONSE (IMPORTANT)
     res.status(200).json({
       success: true,
       message: "User login successfully!",
