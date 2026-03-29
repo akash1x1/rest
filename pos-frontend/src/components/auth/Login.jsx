@@ -19,20 +19,28 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 🔥 Mutation
+  // 🔥 UPDATED MUTATION WITH FULL DEBUG
   const loginMutation = useMutation({
-    mutationFn: (reqData) => login(reqData),
+    mutationFn: async (reqData) => {
+      console.log("🚀 SENDING REQUEST TO BACKEND...");
+      console.log("📦 Request Data:", reqData);
+
+      const response = await login(reqData);
+
+      console.log("🔥 RAW API RESPONSE:", response);
+
+      return response;
+    },
 
     onSuccess: (res) => {
-      console.log("LOGIN SUCCESS:", res);
+      console.log("✅ LOGIN SUCCESS:", res);
 
-      // ✅ SAFE ACCESS
       const user = res?.data?.data;
 
-      // ❗ Handle wrong response
+      console.log("👤 USER OBJECT:", user);
+
       if (!user) {
-        console.log("Invalid response:", res);
-        enqueueSnackbar("Login failed: invalid server response", {
+        enqueueSnackbar("Invalid server response", {
           variant: "error",
         });
         return;
@@ -48,7 +56,9 @@ const Login = () => {
     },
 
     onError: (error) => {
-      console.log("LOGIN ERROR:", error);
+      console.log("❌ LOGIN ERROR FULL:", error);
+      console.log("❌ ERROR RESPONSE:", error?.response);
+      console.log("❌ ERROR DATA:", error?.response?.data);
 
       const message =
         error?.response?.data?.message || "Login failed";
@@ -57,11 +67,13 @@ const Login = () => {
     },
   });
 
-  // 🔥 Submit handler
+  // 🔥 SUBMIT HANDLER WITH DEBUG
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log("LOGIN CLICKED"); // 👈 DEBUG
+    console.log("🟡 LOGIN BUTTON CLICKED");
+    console.log("📧 EMAIL:", formData.email);
+    console.log("🔑 PASSWORD:", formData.password);
 
     loginMutation.mutate(formData);
   };
@@ -69,7 +81,7 @@ const Login = () => {
   return (
     <div style={{ position: "relative", zIndex: 9999 }}>
       <form onSubmit={handleSubmit}>
-        
+
         {/* Email */}
         <div>
           <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
